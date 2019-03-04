@@ -4,29 +4,28 @@
  */
 
 #define LED_PIN 9
-#define WAVELENGTH 1000
-#define SAMPLE_RATE 100 // The number of samples per wavelength
+#define WAVELENGTH 5000
+#define SAMPLE_RATE (WAVELENGTH / 10)
 
-int (*get_led_lumosity)(int wavelength,
-                        int min_value,
-                        int max_value,
-                        int loop_iteration);
+int (*get_led_lumosity)(int,
+                        int,
+                        int,
+                        int);
 
 void setup() {
   pinMode(LED_PIN, OUTPUT);
   Serial.begin(9600);
 
-  get_led_lumosity = get_stepped_lumosity;
+  get_led_lumosity = get_smooth_lumosity;
 }
 
 void loop() {
   for (int i = 0; /* LOOP FOREVER */; i++) {
-    int lum = get_led_lumosity(WAVELENGTH,
-                               50,
+    int lum = get_led_lumosity(SAMPLE_RATE,
+                               0,
                                255,
                                i);
     analogWrite(LED_PIN, lum);
-    
     Serial.println(lum);
 
     delay(WAVELENGTH / SAMPLE_RATE);
@@ -42,16 +41,15 @@ void loop() {
  * [min_value, max_value] and can be fed directly to a PWM-
  * compatible pin.
  */
-int get_smooth_lumosity(int wavelength,
+int get_smooth_lumosity(int num_samples,
                         int min_value,
                         int max_value,
                         int loop_iteration) {
   int range = max_value - min_value;
-  
-  return (int)(abs(range * sin(loop_iteration
-                               * 2
-                               * PI
-                               / wavelength)) + min_value);
+
+  return (int)(abs(range * sin(PI
+                               * (loop_iteration % num_samples)
+                               / num_samples)) + min_value);
 }
 
 int get_stepped_lumosity(int wavelength,
