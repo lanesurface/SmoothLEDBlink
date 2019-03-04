@@ -4,8 +4,8 @@
  */
 
 #define LED_PIN 9
-#define WAVELENGTH 500
-#define SAMPLE_RATE 10 // The number of samples per wavelength
+#define WAVELENGTH 1000
+#define SAMPLE_RATE 100 // The number of samples per wavelength
 
 int (*get_led_lumosity)(int wavelength,
                         int min_value,
@@ -16,7 +16,7 @@ void setup() {
   pinMode(LED_PIN, OUTPUT);
   Serial.begin(9600);
 
-  get_led_lumosity = get_smooth_lumosity;
+  get_led_lumosity = get_stepped_lumosity;
 }
 
 void loop() {
@@ -58,7 +58,8 @@ int get_stepped_lumosity(int wavelength,
                          int min_value,
                          int max_value,
                          int loop_iteration) {
-  // TODO
-
-  return 255;
+  return (abs(max_value
+              * loop_iteration
+              * 2
+              / wavelength) + min_value) % 255;
 }
