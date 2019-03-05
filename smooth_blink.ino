@@ -16,7 +16,7 @@ void setup() {
   pinMode(LED_PIN, OUTPUT);
   Serial.begin(9600);
 
-  get_led_lumosity = get_smooth_lumosity;
+  get_led_lumosity = get_stepped_lumosity;
 }
 
 void loop() {
@@ -52,12 +52,16 @@ int get_smooth_lumosity(int num_samples,
                                / num_samples)) + min_value);
 }
 
-int get_stepped_lumosity(int wavelength,
+int get_stepped_lumosity(int num_samples,
                          int min_value,
                          int max_value,
                          int loop_iteration) {
-  return (abs(max_value
-              * loop_iteration
-              * 2
-              / wavelength) + min_value) % 255;
+  return (abs(loop_iteration
+              % num_samples
+              * max_value
+              / num_samples) + min_value);
+//  return (abs(max_value
+//              * loop_iteration
+//              * 2
+//              / wavelength) + min_value) % 255;
 }
